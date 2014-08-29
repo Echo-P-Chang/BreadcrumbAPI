@@ -1,0 +1,127 @@
+﻿@{
+    ViewBag.Title = "Upload Test";
+}
+
+<header>   
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <script type="text/javascript">
+        var formdata = null;
+        var supportedHTML5 = false;
+        supportedHTML5 = typeof FormData == 'function';
+        var s;
+        function sleep(milliseconds) {
+            var start = new Date().getTime();
+            for (var i = 0; i < 1e7; i++) {
+                if ((new Date().getTime() - start) > milliseconds) {
+                    break;
+                }
+            }
+        }
+        if (supportedHTML5) {
+
+            var jqueryInclude = document.createElement('script');
+            jqueryInclude.type = 'text/javascript';
+            jqueryInclude.src = '@Url.Content("~/Scripts/jquery-1.10.1.min.js")';
+            s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jqueryInclude, s);
+            sleep(500);
+
+            var jqueryMobileIncludes = document.createElement('script');
+            jqueryMobileIncludes.type = 'text/javascript';
+            jqueryMobileIncludes.src = '@Url.Content("~/Scripts/jquery.mobile-1.3.1.min.js")';
+            s.parentNode.insertBefore(jqueryMobileIncludes, s);
+
+            var jqueryMobileCssIncludes = document.createElement('link');
+            jqueryMobileCssIncludes.rel = 'stylesheet';
+            jqueryMobileCssIncludes.href = '@Url.Content("~/Scripts/jquery.mobile-1.3.1.min.css")';
+            s.parentNode.insertBefore(jqueryMobileCssIncludes, s);
+
+        }
+        else {
+            var jqueryInclude = document.createElement('script');
+            jqueryInclude.type = 'text/javascript';
+            jqueryInclude.src = '@Url.Content("~/Scripts/jquery-1.7.1.min.js")';
+            s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jqueryInclude, s);
+
+
+            var jqueryValideIncludes = document.createElement('script');
+            jqueryValideIncludes.type = 'text/javascript';
+            jqueryValideIncludes.src = '@Url.Content("~/Scripts/jquery.validate.min.js")';
+            s.parentNode.insertBefore(jqueryValideIncludes, s);
+
+            var jqueryValidateUnobtrusiveIncludes = document.createElement('script');
+            jqueryValidateUnobtrusiveIncludes.type = 'text/javascript';
+            jqueryValidateUnobtrusiveIncludes.src = '@Url.Content("~/Scripts/jquery.validate.unobtrusive.min.js")';
+            s.parentNode.insertBefore(jqueryValidateUnobtrusiveIncludes, s);
+
+            var jqueryUnobtrusiveAjaxIncludes = document.createElement('script');
+            jqueryUnobtrusiveAjaxIncludes.type = 'text/javascript';
+            jqueryUnobtrusiveAjaxIncludes.src = '@Url.Content("~/Scripts/jquery.unobtrusive-ajax.js")';
+            s.parentNode.insertBefore(jqueryUnobtrusiveAjaxIncludes, s);
+
+        }
+
+        window.onload = function () {
+            if (supportedHTML5) {
+                $('#submit').attr("type", "Button");
+                $('#submit').attr("onclick", "showProgress()");
+
+                $('#popupBasic').attr("data-role", "popup");
+                $('#popupBasic').attr("data-transition", "flip");
+                $('#popupBasic').attr("style", "display:block");
+
+            }
+        }
+
+        function showProgress() {
+            $.mobile.loading("show", {
+                text: "Processing...",
+                textVisible: true,
+                theme: "e",
+                textonly: false,
+                html: ""
+            });
+
+            formdata = new FormData($('form')[0]);
+
+            $.ajax({
+                type: "POST",
+                url: "/Default/Index",
+                enctype: 'multipart/form-data',
+                data: formdata,
+                success: function (result) {
+                    $.mobile.loading("hide");
+                    $('#mod1').html(result);
+                },
+                error: function (req, status, error) {
+                    $.mobile.loading("hide");
+                    $("#responseItem").text("Network Error.");
+                    $("#popupBasic").popup("open");
+                },
+                cache: false,
+                contentType: false,
+                processData: false
+            });
+
+        }
+    </script>
+</header>
+<body>
+@using (@Html.BeginForm("Index", "Home", null, FormMethod.Post, new { id = "myForm", enctype = "multipart/form-data" })) 
+{
+  <label for="file">Upload Test:</label>
+  <input type="file" name="file" id="file"/>
+  <input id="submit" type="Submit" value="Submit"/>
+}
+
+
+<div id="popupBasic" style="display:none">
+  <p id="responseItem"><p>
+</div>
+<div id="errorPanel">
+    @Html.ValidationSummary()
+</div>
+</body>
